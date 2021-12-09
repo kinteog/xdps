@@ -7,6 +7,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn import svm
 from sklearn.metrics import accuracy_score
 
+from db_fxns import  get_name, view_unique_name, edit_patient_data
+
 def load_model():
     with open('saved_park.pkl', 'rb') as file:
         data = pickle.load(file)
@@ -20,47 +22,87 @@ def show_parkinson_page():
     st.title("Parkinson's disease Prediction Service")
 
     st.write("""### We need some information to predict Patient's Parkinson's disease status""")
+   
+   
 
 
     st.write("""### Several measures of variation in fundamental frequency""")
 
-    MDVPFoHz = st.number_input("MDVP:Fo(Hz) - Average vocal fundamental frequency", min_value=50.0, max_value=300.0, value=100.1, step=1.0, format="%0f")
-    MDVPFhiHz = st.number_input("MDVP:Fhi(Hz) - Maximum vocal fundamental frequency", min_value=100.0, max_value=600.0, value=100.1, step=1.0, format="%0f")
-    MDVPFloHz = st.number_input("MDVP:Flo(Hz) - Minimum vocal fundamental frequency", min_value=60.0, max_value=250.0, value=100.1, step=1.0, format="%0f")
-    MDVPJitterPercent = st.number_input("MDVP:Jitter(%)", value=0.1, step=1.0, format="%0f")
-    MDVPJitterAbs = st.number_input("MDVP:Jitter(Abs)",  max_value=1.0, value=0.1, step=0.1, format="%0f")
-    MDVPRAP = st.number_input("MDVP:RAP",  max_value=1.0, value=0.1, step=0.1, format="%0f")
-    MDVPPPQ = st.number_input("MDVP:PPQ",  max_value=1.0, value=0.1, step=0.1 , format="%0f")
+    col1,col2,col3 = st.columns(3)
+    col4,col5,col6 = st.columns(3)
+    col7,col8,col9 = st.columns(3)
+    with col1:
+        MDVPFoHz = st.number_input("MDVP:Fo(Hz) - Average vocal fundamental frequency", min_value=50.0, max_value=300.0, value=100.1, step=1.0, format="%0f")
+    with col2:
+        MDVPFhiHz = st.number_input("MDVP:Fhi(Hz) - Maximum vocal fundamental frequency", min_value=100.0, max_value=600.0, value=100.1, step=1.0, format="%0f")
+    with col3:
+        MDVPFloHz = st.number_input("MDVP:Flo(Hz) - Minimum vocal fundamental frequency", min_value=60.0, max_value=250.0, value=100.1, step=1.0, format="%0f")
+    with col4:
+        MDVPJitterPercent = st.number_input("MDVP:Jitter(%)", value=0.1, step=1.0, format="%0f")
+    with col5:
+        MDVPJitterAbs = st.number_input("MDVP:Jitter(Abs)",  max_value=1.0, value=0.1, step=0.1, format="%0f")
+    with col6:
+        MDVPRAP = st.number_input("MDVP:RAP",  max_value=1.0, value=0.1, step=0.1, format="%0f")
+    with col7:
+        MDVPPPQ = st.number_input("MDVP:PPQ",  max_value=1.0, value=0.1, step=0.1 , format="%0f")
+    with col8:
+        st.write(".")
+    with col9:
+        st.write(".")
+    
+    
 
     st.write("""### Several measures of variation in amplitude""")
 
-    JitterDDP = st.number_input("Jitter:DDP",  max_value=1.0, value=0.1, step=1.0, format="%0f")
-    MDVPShimmer = st.number_input("MDVP:Shimmer", max_value=1.0, value=0.1, step=0.1, format="%0f")
-    MDVPShimmerdB = st.number_input("MDVP:Shimmer(dB)", max_value=2.0, value=1.0, step=0.1, format="%0f")
-    ShimmerAPQ3 = st.number_input("Shimmer:APQ3", max_value=1.0, value=0.1, step=0.1, format="%0f")
-    ShimmerAPQ5 = st.number_input("Shimmer:APQ5", max_value=1.0, value=0.1, step=0.1, format="%0f")
-    MDVPAPQ = st.number_input("MDVP:APQ", max_value=1.0, value=0.1, step=0.1, format="%0f")
-    ShimmerDDA = st.number_input("Shimmer:DDA", max_value=1.0, value=0.1, step=0.1, format="%0f")
+    col10,col11,col12 = st.columns(3)
+    col13,col14,col15 = st.columns(3)
+    col16,col17,col18 = st.columns(3)
+    with col10:
+        JitterDDP = st.number_input("Jitter:DDP",  max_value=1.0, value=0.1, step=1.0, format="%0f")
+    with col11:
+        MDVPShimmer = st.number_input("MDVP:Shimmer", max_value=1.0, value=0.1, step=0.1, format="%0f")
+    with col12:
+        MDVPShimmerdB = st.number_input("MDVP:Shimmer(dB)", max_value=2.0, value=1.0, step=0.1, format="%0f")
+    with col13:
+        ShimmerAPQ3 = st.number_input("Shimmer:APQ3", max_value=1.0, value=0.1, step=0.1, format="%0f")
+    with col14:
+        ShimmerAPQ5 = st.number_input("Shimmer:APQ5", max_value=1.0, value=0.1, step=0.1, format="%0f")
+    with col15:
+        MDVPAPQ = st.number_input("MDVP:APQ", max_value=1.0, value=0.1, step=0.1, format="%0f")
+    with col16:
+        ShimmerDDA = st.number_input("Shimmer:DDA", max_value=1.0, value=0.1, step=0.1, format="%0f")
+    with col17:
+        st.write(".")
+    with col18:
+        st.write(".")
 
     st.write("""### Two measures of ratio of noise to tonal components in the voice""")
+    col19,col20 = st.columns(2)
+    with col19:
 
-    NHR = st.number_input("NHR",  max_value=1.0, value=0.1, step=0.1, format="%0f")
-    HNR = st.number_input("HNR", max_value=40.0, value=10.1, step=0.1, format="%0f")
+        NHR = st.number_input("NHR",  max_value=1.0, value=0.1, step=0.1, format="%0f")
+    with col20:
+        HNR = st.number_input("HNR", max_value=40.0, value=10.1, step=0.1, format="%0f")
 
     st.write("""### Two nonlinear dynamical complexity measures""")
-
-    RPDE = st.number_input("RPDE", max_value=1.0, value=0.1, step=0.1, format="%0f")
-    D2 = st.number_input("D2",min_value=0.0, max_value=1.0, value=0.1, step=0.1, format="%0f")
+    col21,col22 = st.columns(2)
+    with col21:
+        RPDE = st.number_input("RPDE", max_value=1.0, value=0.1, step=0.1, format="%0f")
+    with col22:
+        D2 = st.number_input("D2",min_value=0.0, max_value=1.0, value=0.1, step=0.1, format="%0f")
 
     st.write("""### Signal fractal scaling exponent""")
 
     DFA = st.number_input("DFA",  max_value=1.0, value=0.1, step=0.1, format="%0f")
 
     st.write("""### Three nonlinear measures of fundamental frequency variation""")
-
-    spread1 = st.number_input("spread1",  max_value=1.0, value=0.1, step=0.1, format="%0f")
-    spread2 = st.number_input("spread2", max_value=5.0, value=0.1, step=0.1, format="%0f")
-    PPE = st.number_input("PPE", max_value=1.0, value=0.1, step=0.1 , format="%0f")
+    col23,col24,col25 = st.columns(3)
+    with col23:
+        spread1 = st.number_input("spread1",  max_value=1.0, value=0.1, step=0.1, format="%0f")
+    with col24:
+        spread2 = st.number_input("spread2", max_value=5.0, value=0.1, step=0.1, format="%0f")
+    with col25:
+        PPE = st.number_input("PPE", max_value=1.0, value=0.1, step=0.1 , format="%0f")
 
 
 
@@ -112,10 +154,46 @@ def show_parkinson_page():
         prediction = model.predict(std_data)
         print(prediction)
         if(prediction[0] ==0):
-             st.subheader(f"The Person does not have Parkinsons Disease")
+             st.subheader(f"The Patient does not have Parkinson's Disease")
         else:
-             st.subheader(f"The Person has Parkinsons")
+             st.subheader(f"The Patient has Parkinson's Disease")
+        train_accuracy = training_data_accuracy*100
+        st.subheader(f"The Accuracy Of The Model is : {train_accuracy:.2f} %")
+        st.write("___________________________________________________________")
+    st.subheader("Update Patient's Parkinson's Status To Database")
+    list_of_name = [i [0] for i in view_unique_name()]
+    selected_name = st.selectbox("Patient's Detail To Edit",list_of_name)
+    selected_result = get_name(selected_name)
+
+    if selected_result:
         
+
+        name = selected_result[0][0]
+        id = selected_result[0][1]
+        diabetis = selected_result[0][2]
+        heart = selected_result[0][3]
+        parkinsons = selected_result[0][4]
+        Hospital = selected_result[0][5]
+        date = selected_result[0][6]
+
+        col20,col21 = st.columns(2)
+
+        new_name = name
+        new_id = id
+        new_diabetis = diabetis
+        new_heart = heart
+        new_Hospital = Hospital
+
+        with col20:
+            new_parkinsons = st.selectbox("Parkinson's Disease Status" , ["Not Tested","Positive", "Negative"])
+        with col21:
+            new_date = st.date_input("Date of last testing")
+
+
+    add = st.button("Update Patient Parkinson's Disease Status")
+    if add:
+        edit_patient_data(new_name,new_id,new_diabetis,new_heart,new_parkinsons,new_Hospital,new_date,name,id,diabetis,heart,parkinsons,Hospital,date)
+        st.success("sucessfully updated :: {}'s :: Parkinson's Disease status  ".format(name))        
 
         
 

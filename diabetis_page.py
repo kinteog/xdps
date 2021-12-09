@@ -8,6 +8,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
 from sklearn import svm
 
+from db_fxns import  get_name, view_unique_name, edit_patient_data
+
 def load_model():
     with open('saved_steps.pkl', 'rb') as file:
         data = pickle.load(file)
@@ -21,15 +23,27 @@ def show_diabetis_page():
     st.title("Diabetis Prediction Service")
 
     st.write("""### We need some information to predict Patient's Diabetis status""")
+    col1,col2,col3 = st.columns(3)
+    col4,col5,col6 = st.columns(3)
+    col7,col8 = st.columns(2)
 
-    Pregnancies = st.number_input("Pregnancies", min_value=0, max_value=30, value=1, step=1)
-    Glucose = st.number_input("Glucose", min_value=0, max_value=250, value=85, step=1)
-    BloodPressure = st.number_input("Blood Pressure", min_value=0, max_value=150, value=66, step=1)
-    SkinThickness = st.number_input("Skin Thickness", min_value=0, max_value=150, value=29, step=1)
-    Insulin = st.number_input("Insulin Level", min_value=0, max_value=650, value=0, step=1)
-    bmi = st.number_input("BMI value", min_value=0.0, max_value=50.0, value=26.6, step=0.1, format="%0f")
-    DiabetesPedigreeFunction = st.number_input("Diabetes Pedigree Function", min_value=0.0000, max_value=5.0000, value=0.03, step=0.01 , format="%0f")
-    Agee = st.number_input("Age", min_value=0, max_value=150, value=31, step=1)
+    
+    with col1:
+        Pregnancies = st.number_input("Pregnancies", min_value=0, max_value=30, value=1, step=1)
+    with col2:
+        Glucose = st.number_input("Glucose", min_value=0, max_value=250, value=85, step=1)
+    with col3:
+        BloodPressure = st.number_input("Blood Pressure", min_value=0, max_value=150, value=66, step=1)
+    with col4:
+        SkinThickness = st.number_input("Skin Thickness", min_value=0, max_value=150, value=29, step=1)
+    with col5:
+        Insulin = st.number_input("Insulin Level", min_value=0, max_value=650, value=0, step=1)
+    with col6:
+        bmi = st.number_input("BMI value", min_value=0.0, max_value=50.0, value=26.6, step=0.1, format="%0f")
+    with col7:
+        DiabetesPedigreeFunction = st.number_input("Diabetes Pedigree Function", min_value=0.0000, max_value=5.0000, value=0.03, step=0.01 , format="%0f")
+    with col8:
+        Agee = st.number_input("Age", min_value=0, max_value=150, value=31, step=1)
 
     ok = st.button("Predict diabetis status")
     if ok:
@@ -75,7 +89,44 @@ def show_diabetis_page():
              st.subheader(f"The Patient is not Diabetic")
         else:
              st.subheader(f"The Patient is Diabetic")
+        train_accuracy = training_data_accuracy*100
+        st.subheader(f"The Accuracy Of The Model is : {train_accuracy:.2f} %")
+        st.write("___________________________________________________________")
+    st.subheader("Update Patient's Diabetis Status To Database")
+    list_of_name = [i [0] for i in view_unique_name()]
+    selected_name = st.selectbox("Patient's Detail To Edit",list_of_name)
+    selected_result = get_name(selected_name)
+
+    if selected_result:
         
+
+        name = selected_result[0][0]
+        id = selected_result[0][1]
+        diabetis = selected_result[0][2]
+        heart = selected_result[0][3]
+        parkinsons = selected_result[0][4]
+        Hospital = selected_result[0][5]
+        date = selected_result[0][6]
+
+        col20,col21 = st.columns(2)
+
+        new_name = name
+        new_id = id
+        new_heart = heart
+        new_parkinsons = parkinsons
+        new_Hospital = Hospital
+
+        with col20:
+            new_diabetis = st.selectbox("Diabetis Status" , ["Not Tested","Positive", "Negative"])
+        with col21:
+            new_date = st.date_input("Date of last testing")
+
+
+    add = st.button("Update Patient Diabetis Status")
+    if add:
+        edit_patient_data(new_name,new_id,new_diabetis,new_heart,new_parkinsons,new_Hospital,new_date,name,id,diabetis,heart,parkinsons,Hospital,date)
+        st.success("sucessfully updated :: {}'s :: diabetis status  ".format(name))
+    
 
         
 
