@@ -6,7 +6,7 @@ from PIL import Image
 import csv
 from db_fxns import create_usertable, add_userdata, edit_userpassword, edit_userprofile, login_user, view_user, edit_userprofile,edit_userpassword
 
-image = Image.open('images/Profilepicture.png')
+image = Image.open('images/PROFILEPHOTO.png')
 
 @st.cache
 def load_data():
