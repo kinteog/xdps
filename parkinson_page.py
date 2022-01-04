@@ -6,8 +6,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn import svm
 from sklearn.metrics import accuracy_score
+import csv
 
-from db_fxns import  get_name, view_unique_name, edit_patient_data
+from db_fxns import  get_name, view_unique_name, edit_patient_data, create_usertable ,login_user
 
 def load_model():
     with open('saved_park.pkl', 'rb') as file:
@@ -155,45 +156,64 @@ def show_parkinson_page():
         print(prediction)
         if(prediction[0] ==0):
              st.subheader(f"The Patient does not have Parkinson's Disease")
+             predict_target=0
         else:
              st.subheader(f"The Patient has Parkinson's Disease")
+             predict_target=1
         train_accuracy = training_data_accuracy*100
         st.subheader(f"The Accuracy Of The Model is : {train_accuracy:.2f} %")
         st.write("___________________________________________________________")
-    st.subheader("Update Patient's Parkinson's Status To Database")
-    list_of_name = [i [0] for i in view_unique_name()]
-    selected_name = st.selectbox("Patient's Detail To Edit",list_of_name)
-    selected_result = get_name(selected_name)
+        with open ('newparkinson.csv','a',newline='') as file:
+            myFile = csv.writer(file)
+            #myFile.writerow(["MDVP:Fo(Hz)","MDVP:Fhi(Hz)","MDVP:Flo(Hz)","MDVP:Jitter(%)","MDVP:Jitter(Abs)","MDVP:RAP","MDVP:PPQ","Jitter:DDP","MDVP:Shimmer","MDVP:Shimmer(dB)","Shimmer:APQ3","Shimmer:APQ5","MDVP:APQ","Shimmer:DDA","NHR","HNR","status","RPDE","D2","DFA","spread1","spread2","PPE"])
+            myFile.writerow([MDVPFoHz,MDVPFhiHz, MDVPFloHz,MDVPJitterPercent,MDVPJitterAbs,MDVPRAP,MDVPPPQ,JitterDDP,MDVPShimmer,MDVPShimmerdB,ShimmerAPQ3,ShimmerAPQ5,MDVPAPQ,ShimmerDDA,NHR,HNR,predict_target,RPDE,D2,DFA,spread1,spread2,PPE])
+    st.sidebar.write("___________________________________________________________")
+    st.sidebar.write("You need to login to access professional features of this service")
+    st.sidebar.write(" # Login Here #")
+    username = st.sidebar.text_input("User Name")
+    password = st.sidebar.text_input("Password" ,type="password")
+    if st.sidebar.checkbox("Login"):
+        create_usertable()
+        resultss = login_user(username,password)
+        #if password == "1234":
+        if resultss:
+            st.success("Succesfully logged in as {}".format(username))
+            st.subheader("Update Patient's Parkinson's Status To Database")
+            list_of_name = [i [0] for i in view_unique_name()]
+            selected_name = st.selectbox("Patient's Detail To Edit",list_of_name)
+            selected_result = get_name(selected_name)
 
-    if selected_result:
-        
+            if selected_result:
+                
 
-        name = selected_result[0][0]
-        id = selected_result[0][1]
-        diabetis = selected_result[0][2]
-        heart = selected_result[0][3]
-        parkinsons = selected_result[0][4]
-        Hospital = selected_result[0][5]
-        date = selected_result[0][6]
+                name = selected_result[0][0]
+                id = selected_result[0][1]
+                diabetis = selected_result[0][2]
+                heart = selected_result[0][3]
+                parkinsons = selected_result[0][4]
+                Hospital = selected_result[0][5]
+                date = selected_result[0][6]
 
-        col20,col21 = st.columns(2)
+                col20,col21 = st.columns(2)
 
-        new_name = name
-        new_id = id
-        new_diabetis = diabetis
-        new_heart = heart
-        new_Hospital = Hospital
+                new_name = name
+                new_id = id
+                new_diabetis = diabetis
+                new_heart = heart
+                new_Hospital = Hospital
 
-        with col20:
-            new_parkinsons = st.selectbox("Parkinson's Disease Status" , ["Not Tested","Positive", "Negative"])
-        with col21:
-            new_date = st.date_input("Date of last testing")
+                with col20:
+                    new_parkinsons = st.selectbox("Parkinson's Disease Status" , ["Not Tested","Positive", "Negative"])
+                with col21:
+                    new_date = st.date_input("Date of last testing")
 
 
-    add = st.button("Update Patient Parkinson's Disease Status")
-    if add:
-        edit_patient_data(new_name,new_id,new_diabetis,new_heart,new_parkinsons,new_Hospital,new_date,name,id,diabetis,heart,parkinsons,Hospital,date)
-        st.success("sucessfully updated :: {}'s :: Parkinson's Disease status  ".format(name))        
+            add = st.button("Update Patient Parkinson's Disease Status")
+            if add:
+                edit_patient_data(new_name,new_id,new_diabetis,new_heart,new_parkinsons,new_Hospital,new_date,name,id,diabetis,heart,parkinsons,Hospital,date)
+                st.success("sucessfully updated :: {}'s :: Parkinson's Disease status  ".format(name))
+        else:
+            st.warning("Incorrect Username/password combination")
 
         
 

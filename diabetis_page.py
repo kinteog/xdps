@@ -7,8 +7,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
 from sklearn import svm
+import csv
 
-from db_fxns import  get_name, view_unique_name, edit_patient_data
+from db_fxns import  get_name, view_unique_name, edit_patient_data, create_usertable, login_user
 
 def load_model():
     with open('saved_steps.pkl', 'rb') as file:
@@ -19,10 +20,10 @@ data = load_model()
 
 classifiers = data["model"]
 
-def show_diabetis_page():
-    st.title("Diabetis Prediction Service")
+def show_diabetes_page():
+    st.title("Diabetes Prediction Service")
 
-    st.write("""### We need some information to predict Patient's Diabetis status""")
+    st.write("""### We need some information to predict Patient's Diabetes status""")
     col1,col2,col3 = st.columns(3)
     col4,col5,col6 = st.columns(3)
     col7,col8 = st.columns(2)
@@ -45,7 +46,7 @@ def show_diabetis_page():
     with col8:
         Agee = st.number_input("Age", min_value=0, max_value=150, value=31, step=1)
 
-    ok = st.button("Predict diabetis status")
+    ok = st.button("Predict diabetes status")
     if ok:
         diabetes_dataset=pd.read_csv('diabetes.csv')
 
@@ -86,47 +87,65 @@ def show_diabetis_page():
         prediction=classifiers.predict(std_data)
 
         if(prediction[0] ==0):
+             predict_outcome=0
              st.subheader(f"The Patient is not Diabetic")
         else:
+             predict_outcome=1
              st.subheader(f"The Patient is Diabetic")
         train_accuracy = training_data_accuracy*100
         st.subheader(f"The Accuracy Of The Model is : {train_accuracy:.2f} %")
         st.write("___________________________________________________________")
-    st.subheader("Update Patient's Diabetis Status To Database")
-    list_of_name = [i [0] for i in view_unique_name()]
-    selected_name = st.selectbox("Patient's Detail To Edit",list_of_name)
-    selected_result = get_name(selected_name)
+        with open ('newdiabetes.csv','a',newline='') as file:
+            myFile = csv.writer(file)
+            #myFile.writerow(["Pregnancies","Glucose","BloodPressure","SkinThickness","Insulin","BMI","DiabetesPedigreeFunction","Age","Outcome"])
+            myFile.writerow([Pregnancies,Glucose,BloodPressure,SkinThickness,Insulin,bmi,DiabetesPedigreeFunction,Agee,predict_outcome])
+    st.sidebar.write("___________________________________________________________")
+    st.sidebar.write("You need to login to access professional features of this service")
+    st.sidebar.write(" # Login Here #")
+    username = st.sidebar.text_input("User Name")
+    password = st.sidebar.text_input("Password" ,type="password")
+    if st.sidebar.checkbox("Login"):
+        create_usertable()
+        resultss = login_user(username,password)
+        #if password == "1234":
+        if resultss:
+            st.success("Succesfully logged in as {}".format(username))
+            st.subheader("Update Patient's Diabetes Status To Database")
+            list_of_name = [i [0] for i in view_unique_name()]
+            selected_name = st.selectbox("Patient's Detail To Edit",list_of_name)
+            selected_result = get_name(selected_name)
 
-    if selected_result:
-        
+            if selected_result:
+                
 
-        name = selected_result[0][0]
-        id = selected_result[0][1]
-        diabetis = selected_result[0][2]
-        heart = selected_result[0][3]
-        parkinsons = selected_result[0][4]
-        Hospital = selected_result[0][5]
-        date = selected_result[0][6]
+                name = selected_result[0][0]
+                id = selected_result[0][1]
+                diabetis = selected_result[0][2]
+                heart = selected_result[0][3]
+                parkinsons = selected_result[0][4]
+                Hospital = selected_result[0][5]
+                date = selected_result[0][6]
 
-        col20,col21 = st.columns(2)
+                col20,col21 = st.columns(2)
 
-        new_name = name
-        new_id = id
-        new_heart = heart
-        new_parkinsons = parkinsons
-        new_Hospital = Hospital
+                new_name = name
+                new_id = id
+                new_heart = heart
+                new_parkinsons = parkinsons
+                new_Hospital = Hospital
 
-        with col20:
-            new_diabetis = st.selectbox("Diabetis Status" , ["Not Tested","Positive", "Negative"])
-        with col21:
-            new_date = st.date_input("Date of last testing")
+                with col20:
+                    new_diabetis = st.selectbox("Diabetis Status" , ["Not Tested","Positive", "Negative"])
+                with col21:
+                    new_date = st.date_input("Date of last testing")
 
 
-    add = st.button("Update Patient Diabetis Status")
-    if add:
-        edit_patient_data(new_name,new_id,new_diabetis,new_heart,new_parkinsons,new_Hospital,new_date,name,id,diabetis,heart,parkinsons,Hospital,date)
-        st.success("sucessfully updated :: {}'s :: diabetis status  ".format(name))
-    
+            add = st.button("Update Patient Diabetes Status")
+            if add:
+                edit_patient_data(new_name,new_id,new_diabetis,new_heart,new_parkinsons,new_Hospital,new_date,name,id,diabetis,heart,parkinsons,Hospital,date)
+                st.success("sucessfully updated :: {}'s :: diabetis status  ".format(name))
+        else:
+            st.warning("Incorrect Username/password combination")
 
         
 

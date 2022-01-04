@@ -3,6 +3,8 @@ import sqlite3
 conn = sqlite3.connect('data.db',check_same_thread=False)
 c = conn.cursor()
 
+#patient database section
+
 
 def create_table():
     c.execute('CREATE TABLE IF NOT EXISTS Patientstable(name TEXT,id TEXT,diabetis TEXT,heart TEXT,parkinsons TEXT,Hospital TEXT,date DATE)')
@@ -38,3 +40,35 @@ def edit_patient_data(new_name,new_id,new_diabetis,new_heart,new_parkinsons,new_
 def delete_data(name):
 	c.execute('DELETE FROM Patientstable WHERE name="{}"'.format(name))
 	conn.commit()
+
+
+    #authentication section
+
+def create_usertable():
+    c.execute('CREATE TABLE IF NOT EXISTS authtable(username TEXT,password TEXT,email TEXT,regno TEXT)')
+
+def add_userdata(username,password,email,regno):
+    c.execute('INSERT INTO authtable(username,password,email,regno) VALUES(?,?,?,?)',(username,password,email,regno))
+    conn.commit()
+def login_user(username,password):
+    c.execute('SELECT * FROM authtable WHERE username =? AND password =?',(username,password))
+    data = c.fetchall()
+    return data
+def view_allusers():
+    c.execute('SELECT * FROM authtable')
+    data = c.fetchall()
+    return data
+def view_user(username):
+    c.execute('SELECT * FROM authtable WHERE username="{}"'.format(username))
+    data = c.fetchall()
+    return data
+def edit_userprofile(update_user,update_email,username,email):
+    c.execute('UPDATE authtable SET username=?,email=? WHERE username = ? and email = ?',(update_user,update_email,username,email))
+    conn.commit()
+    data = c.fetchall()
+    return data
+def edit_userpassword(updated_password,password):
+    c.execute('UPDATE authtable SET password = ? WHERE password = ?',(updated_password,password))
+    conn.commit()
+    data = c.fetchall()
+    return data
